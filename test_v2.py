@@ -16,47 +16,57 @@ pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("MissionCode")
 
 
-#para cambiar de pantalla
-pantalla_actual = None
-
 class Menu_Principal():
 
     def __init__(self):
         self.fondo = pygame.image.load("Imagenes/Mockups/menufinal.png")
-        self.boton_start = pygame.image.load('Imagenes/Animaciones/cohete.png')
+        self.boton_start = pygame.image.load('Imagenes/Animaciones/start.png')
+        self.boton_start_rect = self.boton_start.get_rect(center=(ANCHO // 2, ALTO // 1))
+        self.fuente = pygame.font.Font(None ,32)
 
-        #self.fondo = self.fondo.convert()
+    def draw(self):
+        pantalla.blit(self.fondo, (0, 0))
+        pantalla.blit(self.boton_start, self.boton_start_rect)
+        texto = self.fuente.render("Programa tu propio cohete", True, BLANCO)
+        rect_texto = texto.get_rect(center=(ANCHO // 2, ALTO // 2 - 100))
+        pantalla.blit(texto, rect_texto)
+        pygame.display.flip()
 
-        #super().__init__("Imagenes/Mockups/menu-principal.png")
-        """self.boton_start = pygame_menu.widgets.Button(title='',
-                                                       image_path='Imagenes/Animaciones/cohete.png',
-                                                       image_width=100,
-                                                       image_height=100,
-                                                       onselect=self.funcion_del_boton)
-        """
-    def funcion_del_boton(self, boton_start):
-        pantalla.blit(self.boton_start, (180, 50))
+class Instrucciones:
+    def __init__(self):
+        self.fondo = pygame.image.load("Imagenes/Mockups/elige-cohete.png")
+        self.boton_start = pygame.image.load('Imagenes/Animaciones/start.png')
+        self.boton_start_rect = self.boton_start.get_rect(center=(ANCHO // 2, ALTO // 1))
+
+    def draw(self):
+        pantalla.blit(self.fondo, (0, 0))
+        pantalla.blit(self.boton_start, self.boton_start_rect)
+        pygame.display.flip()
 
 
 menu_principal = Menu_Principal()
+instrucciones = Instrucciones()
+#para cambiar de pantalla
+pantalla_actual = menu_principal
+
 
 while True:
-
-    events = pygame.event.get()
-    for event in events:
+    for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-            # pantalla_actual.mostrar_pantalla_principal()
-            pantalla_actual = menu_principal
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if pantalla_actual == menu_principal and menu_principal.boton_start_rect.collidepoint(mouse_pos):
+                pantalla_actual = instrucciones
+            elif pantalla_actual == instrucciones and instrucciones.boton_start_rect.collidepoint(mouse_pos):
+                pantalla_actual = menu_principal
 
-
-
-    pantalla.blit(menu_principal.fondo,(0, 0))
-    pygame.display.flip()
-
+    if pantalla_actual == menu_principal:
+        menu_principal.draw()
+    elif pantalla_actual == instrucciones:
+        instrucciones.draw()
 
 
 

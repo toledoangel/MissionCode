@@ -15,7 +15,7 @@ pantalla = pygame.display.set_mode((ancho_pantalla, alto_pantalla))
 pygame.display.set_caption("Videojuego de Cohetes")
 
 # Cargar las imágenes del cohete
-cohete_imagen = pygame.image.load("Recursos\cohete.png")
+cohete_imagen = pygame.image.load("Animaciones\Ariane5pequeño.svg")
 
 # Obtener el rectángulo del cohete y su posición inicial
 cohete_rect = cohete_imagen.get_rect()

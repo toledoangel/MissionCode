@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Code — Despega el cohete</title>
+<style>
+  :root{
+    --fondo:#0b1026; --panel:#151b3d; --panel2:#1c2450; --borde:#2e3a7a;
+    --texto:#eef1ff; --suave:#a7b0d8; --acento:#ffb703; --ok:#38d977; --mal:#ff5964;
+    --codigo:#0a0e22;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--fondo); color:var(--texto); font-family:'Segoe UI', system-ui, sans-serif; padding:16px; max-width:860px; margin:0 auto;}
+  header{text-align:center; padding:22px 10px 8px;}
+  header h1{font-size:2rem; letter-spacing:.5px;}
+  header h1 span{color:var(--acento);}
+  header p{color:var(--suave); margin-top:6px; font-size:1.02rem;}
+  .tarjeta{background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:18px; margin:16px 0;}
+  .tarjeta h2{font-size:1.25rem; margin-bottom:6px;}
+  .tarjeta h2 .num{background:var(--acento); color:#221a00; border-radius:50%; display:inline-block; width:28px; height:28px; line-height:28px; text-align:center; font-size:1rem; margin-right:8px;}
+  .tarjeta .desc{color:var(--suave); margin-bottom:14px; line-height:1.45;}
+  .bloqueada{opacity:.45; pointer-events:none;}
+  .pasos{display:flex; flex-wrap:wrap; gap:10px;}
+  .paso{background:var(--panel2); border:2px solid var(--borde); color:var(--texto); border-radius:10px; padding:12px 14px; font-size:1rem; cursor:pointer; text-align:left; transition:.15s;}
+  .paso:hover{border-color:var(--acento);}
+  .paso.elegido{border-color:var(--acento); background:#2a3263;}
+  .paso .orden{display:inline-block; background:var(--acento); color:#221a00; font-weight:700; border-radius:50%; width:24px; height:24px; line-height:24px; text-align:center; margin-right:8px;}
+  .paso small{display:block; color:var(--suave); margin-top:4px; font-size:.82rem;}
+  button.accion{background:var(--acento); color:#221a00; border:none; font-weight:700; font-size:1.05rem; padding:12px 22px; border-radius:10px; cursor:pointer; margin-top:14px;}
+  button.accion:hover{filter:brightness(1.08);}
+  button.secundario{background:transparent; color:var(--suave); border:1px solid var(--borde); font-weight:600; padding:12px 16px; border-radius:10px; cursor:pointer; margin-top:14px; margin-left:8px;}
+  .mensaje{margin-top:14px; padding:12px 14px; border-radius:10px; font-weight:600; display:none; line-height:1.45;}
+  .mensaje.ok{display:block; background:#123524; border:1px solid var(--ok); color:#b9f4cd;}
+  .mensaje.mal{display:block; background:#3d1620; border:1px solid var(--mal); color:#ffc9cd;}
+  pre{background:var(--codigo); border:1px solid var(--borde); border-radius:10px; padding:14px; overflow-x:auto; font-size:.92rem; line-height:1.55; margin-top:12px;}
+  pre .kw{color:#ff7edb;} pre .fn{color:#82aaff;} pre .num2{color:#f78c6c;} pre .str{color:#c3e88d;} pre .com{color:#5f6b9e;}
+  pre .rama{background:#233018; display:block; margin:0 -14px; padding:0 14px; border-left:4px solid var(--ok);}
+  .controles{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media(max-width:640px){.controles{grid-template-columns:1fr;}}
+  .control label{font-weight:700; display:block; margin-bottom:6px;}
+  .control input[type=range]{width:100%; accent-color:var(--acento);}
+  .control .valor{color:var(--acento); font-size:1.3rem; font-weight:800;}
+  .altura{background:var(--codigo); border:1px dashed var(--borde); border-radius:10px; padding:14px; text-align:center; margin-top:16px;}
+  .altura .grande{font-size:1.7rem; font-weight:800; color:var(--acento);}
+  .altura small{color:var(--suave);}
+  #lienzoWrap{position:relative; margin-top:14px;}
+  canvas{width:100%; height:380px; background:linear-gradient(#070b1f 60%, #131a3a); border:1px solid var(--borde); border-radius:12px; display:block;}
+  #cuenta{position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-size:6rem; font-weight:900; color:var(--acento); text-shadow:0 4px 24px #000;}
+  footer{text-align:center; color:var(--suave); padding:20px 8px 30px; font-size:.92rem; line-height:1.6;}
+  footer a{color:var(--acento);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🚀 Mission <span>Code</span></h1>
+  <p>Bienvenidos, cadetes. Su misión el día de hoy será despegar un cohete… programándolo.<br>
+  Aprende algoritmos, variables, condicionales y física de cohetes, paso a paso.</p>
+</header>
+
+<!-- NIVEL 1 -->
+<section class="tarjeta" id="nivel1">
+  <h2><span class="num">1</span>El algoritmo de despegue</h2>
+  <p class="desc">Un <b>algoritmo</b> es una lista de pasos en orden. Si el orden está mal, la misión falla.
+  Toca los pasos en el orden correcto para programar la secuencia de despegue:</p>
+  <div class="pasos" id="pasos"></div>
+  <button class="accion" id="btnSecuencia">Programar secuencia</button>
+  <button class="secundario" id="btnReiniciar1">Borrar orden</button>
+  <div class="mensaje" id="msg1"></div>
+  <pre><span class="com"># Así se ve tu algoritmo en Python:</span>
+<span id="codigoSecuencia"><span class="com"># Todavía no ordenas los pasos…</span></span></pre>
+</section>
+
+<!-- NIVEL 2 -->
+<section class="tarjeta bloqueada" id="nivel2">
+  <h2><span class="num">2</span>Variables y física: ¿qué tan alto llegará?</h2>
+  <p class="desc">Una <b>variable</b> guarda un valor que puede cambiar. La altura de un cohete que acelera
+  desde el reposo se calcula con la función <b>altura = ½ × aceleración × tiempo²</b>.
+  Mueve las variables y encuentra los valores para llegar a la órbita correcta: entre <b>113 km</b> y <b>141.75 km</b>.</p>
+  <div class="controles">
+    <div class="control">
+      <label>Aceleración = <span class="valor" id="valA">28</span> m/s²</label>
+      <input type="range" id="inA" min="5" max="60" step="0.5" value="28">
+    </div>
+    <div class="control">
+      <label>Tiempo = <span class="valor" id="valT">90</span> s</label>
+      <input type="range" id="inT" min="10" max="120" step="1" value="90">
+    </div>
+  </div>
+  <div class="altura">
+    <small>altura = ½ × <span id="hA">28</span> × <span id="hT">90</span>²</small><br>
+    <span class="grande" id="hRes">113,400 m</span> <small>= <span id="hKm">113.4</span> km</small>
+  </div>
+  <pre><span class="kw">def</span> <span class="fn">calcular_altura</span>(aceleracion, tiempo):
+    altura = <span class="num2">0.5</span> * aceleracion * tiempo**<span class="num2">2</span>
+    <span class="kw">return</span> altura
+
+aceleracion = <span class="num2" id="cA">28</span>   <span class="com"># m/s²</span>
+tiempo = <span class="num2" id="cT">90</span>        <span class="com"># segundos</span>
+altura = <span class="fn">calcular_altura</span>(aceleracion, tiempo)</pre>
+</section>
+
+<!-- LANZAMIENTO -->
+<section class="tarjeta bloqueada" id="lanzamiento">
+  <h2><span class="num">3</span>¡Despegue!</h2>
+  <p class="desc">El programa revisa tu misión con <b>condicionales</b> (si pasa esto… si no, esto otro…).
+  Cuando lances, fíjate qué rama del código se ejecuta.</p>
+  <div id="lienzoWrap">
+    <canvas id="lienzo" width="800" height="380"></canvas>
+    <div id="cuenta"></div>
+  </div>
+  <button class="accion" id="btnLanzar">🔥 Iniciar cuenta regresiva</button>
+  <div class="mensaje" id="msg3"></div>
+  <pre id="codigoFinal"><span class="kw">def</span> <span class="fn">verificacion_despegue</span>(altura, error):
+<span id="r0">    <span class="kw">if</span> error != <span class="str">"0"</span>:
+        <span class="com"># La secuencia estaba mal: el cohete explota</span></span>
+<span id="r1">    <span class="kw">elif</span> <span class="num2">113000</span> &lt;= altura &lt; <span class="num2">141750</span>:
+        <span class="com"># ¡Despegue exitoso! Rumbo a Marte</span></span>
+<span id="r2">    <span class="kw">elif</span> altura &gt; <span class="num2">141750</span>:
+        <span class="com"># Aceleración demasiado alta: el cohete se cae</span></span>
+<span id="r3">    <span class="kw">else</span>:
+        <span class="com"># Aceleración demasiado pequeña: el cohete se cae</span></span></pre>
+</section>
+
+<footer>
+  Mission Code nació en un taller de divulgación con la <b>Fundación Katya Echazarreta</b> (Ciudad de México, julio de 2023),
+  donde más de 30 cadetes por sesión aprendieron a programar despegar un cohete.<br>
+  Un proyecto de <a href="https://www.instagram.com/el_ingesaurio">@el_ingesaurio</a> · Ingesaurio — divulgación de ciencia e ingeniería en español.
+</footer>
+
+<script>
+const PASOS = [
+  {id:'preparacion', nombre:'Preparación', desc:'Revisar y preparar el cohete para el lanzamiento seguro.', correcto:1},
+  {id:'encendido',   nombre:'Encendido del motor', desc:'Activar el motor para proporcionar la fuerza de despegue.', correcto:2},
+  {id:'verificacion',nombre:'Verificación del sistema', desc:'Comprobar que todos los sistemas estén funcionando correctamente.', correcto:3},
+  {id:'cuenta',      nombre:'Cuenta regresiva', desc:'Contar hacia atrás para crear anticipación antes del despegue.', correcto:4},
+  {id:'despegue',    nombre:'Despegue', desc:'El cohete se eleva desde el suelo y abandona la plataforma.', correcto:5},
+  {id:'ascenso',     nombre:'Ascenso', desc:'El cohete se dirige hacia el espacio siguiendo una trayectoria ascendente.', correcto:6},
+  {id:'control',     nombre:'Control de vuelo', desc:'Ajustar y mantener el rumbo y la estabilidad del cohete durante el vuelo.', correcto:7},
+];
+let orden = [];           // ids en el orden que eligió el cadete
+let errorSecuencia = "sin programar";
+
+const contPasos = document.getElementById('pasos');
+[...PASOS].sort(()=>Math.random()-.5).forEach(p=>{
+  const b=document.createElement('button');
+  b.className='paso'; b.id='paso-'+p.id;
+  b.innerHTML = p.nombre + '<small>'+p.desc+'</small>';
+  b.onclick=()=>{
+    const i = orden.indexOf(p.id);
+    if(i>=0){ orden.splice(i,1); } else { orden.push(p.id); }
+    pintarOrden();
+  };
+  contPasos.appendChild(b);
+});
+function pintarOrden(){
+  PASOS.forEach(p=>{
+    const b=document.getElementById('paso-'+p.id);
+    const i=orden.indexOf(p.id);
+    b.classList.toggle('elegido', i>=0);
+    b.querySelector('.orden')?.remove();
+    if(i>=0){
+      const s=document.createElement('span'); s.className='orden'; s.textContent=i+1;
+      b.prepend(s);
+    }
+  });
+  const cod=document.getElementById('codigoSecuencia');
+  cod.innerHTML = orden.length
+    ? orden.map((id,i)=>{ const p=PASOS.find(x=>x.id===id); return 'paso_'+(i+1)+' = <span class="str">"'+p.nombre+'"</span>'; }).join('\n')
+    : '<span class="com"># Todavía no ordenas los pasos…</span>';
+}
+document.getElementById('btnReiniciar1').onclick=()=>{ orden=[]; pintarOrden(); };
+document.getElementById('btnSecuencia').onclick=()=>{
+  const msg=document.getElementById('msg1');
+  if(orden.length<7){ msg.className='mensaje mal'; msg.textContent='Tu algoritmo está incompleto: ordena los 7 pasos.'; errorSecuencia='incompleto'; return; }
+  for(let i=0;i<7;i++){
+    const p=PASOS.find(x=>x.id===orden[i]);
+    if(p.correcto!==i+1){
+      errorSecuencia='paso '+(i+1);
+      msg.className='mensaje mal';
+      msg.textContent='Error: el paso '+(i+1)+' de tu algoritmo de despegue es incorrecto. Revisa el orden y vuelve a intentarlo, cadete.';
+      return;
+    }
+  }
+  errorSecuencia="0";
+  msg.className='mensaje ok';
+  msg.textContent='--- Secuencia de cohete programada exitosamente --- Ahora ajusta las variables de vuelo.';
+  document.getElementById('nivel2').classList.remove('bloqueada');
+  document.getElementById('lanzamiento').classList.remove('bloqueada');
+  document.getElementById('nivel2').scrollIntoView({behavior:'smooth'});
+};
+
+const inA=document.getElementById('inA'), inT=document.getElementById('inT');
+function altura(){ return 0.5 * parseFloat(inA.value) * Math.pow(parseFloat(inT.value),2); }
+function pintarVars(){
+  document.getElementById('valA').textContent=inA.value;
+  document.getElementById('valT').textContent=inT.value;
+  document.getElementById('hA').textContent=inA.value;
+  document.getElementById('hT').textContent=inT.value;
+  document.getElementById('cA').textContent=inA.value;
+  document.getElementById('cT').textContent=inT.value;
+  const h=altura();
+  document.getElementById('hRes').textContent=Math.round(h).toLocaleString('es-MX')+' m';
+  document.getElementById('hKm').textContent=(h/1000).toFixed(1);
+}
+inA.oninput=pintarVars; inT.oninput=pintarVars; pintarVars();
+
+// ---------- Animación del lanzamiento ----------
+const cv=document.getElementById('lienzo'), ctx=cv.getContext('2d');
+const estrellas=Array.from({length:90},()=>({x:Math.random()*800,y:Math.random()*330,r:Math.random()*1.6+0.3}));
+function dibujar(y, fuego, explosion, marte){
+  ctx.clearRect(0,0,800,380);
+  estrellas.forEach(e=>{ ctx.fillStyle='#cdd7ff'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,7); ctx.fill(); });
+  if(marte){ ctx.fillStyle='#e07a4a'; ctx.beginPath(); ctx.arc(690,60,26,0,7); ctx.fill();
+             ctx.fillStyle='#b8562f'; ctx.beginPath(); ctx.arc(680,52,7,0,7); ctx.arc(702,70,5,0,7); ctx.fill(); }
+  ctx.fillStyle='#232c5c'; ctx.fillRect(0,348,800,32);
+  ctx.fillStyle='#39448a'; ctx.fillRect(330,330,140,18);
+  const x=400, base=348-y;
+  if(explosion){
+    for(let i=0;i<26;i++){ const a=i/26*Math.PI*2, r=18+((i*37)%34);
+      ctx.fillStyle=i%2?'#ffb703':'#ff5964'; ctx.beginPath();
+      ctx.arc(x+Math.cos(a)*r, base-30+Math.sin(a)*r, 6+(i%4)*2, 0, 7); ctx.fill(); }
+    return;
+  }
+  if(fuego){ ctx.fillStyle='#ffb703'; ctx.beginPath();
+    ctx.moveTo(x-9,base); ctx.lineTo(x,base+22+Math.random()*10); ctx.lineTo(x+9,base); ctx.fill();
+    ctx.fillStyle='#ff7b00'; ctx.beginPath();
+    ctx.moveTo(x-5,base); ctx.lineTo(x,base+13+Math.random()*6); ctx.lineTo(x+5,base); ctx.fill(); }
+  ctx.fillStyle='#eef1ff'; ctx.beginPath();
+  ctx.moveTo(x,base-64); ctx.quadraticCurveTo(x+15,base-38,x+15,base); ctx.lineTo(x-15,base);
+  ctx.quadraticCurveTo(x-15,base-38,x,base-64); ctx.fill();
+  ctx.fillStyle='#ff5964'; ctx.beginPath(); ctx.arc(x,base-40,6,0,7); ctx.fill();
+  ctx.fillStyle='#39448a'; ctx.fillRect(x-15,base-12,30,4);
+}
+dibujar(0,false,false,true);
+
+document.getElementById('btnLanzar').onclick=()=>{
+  const msg=document.getElementById('msg3');
+  ['r0','r1','r2','r3'].forEach(id=>document.getElementById(id).classList.remove('rama'));
+  msg.className='mensaje'; msg.style.display='none';
+  const cuenta=document.getElementById('cuenta');
+  cuenta.style.display='flex';
+  let n=5;
+  cuenta.textContent=n;
+  const iv=setInterval(()=>{ n--; if(n>0){ cuenta.textContent=n; }
+    else if(n===0){ cuenta.textContent='¡DESPEGUE!'; }
+    else { clearInterval(iv); cuenta.style.display='none'; animar(); } },700);
+
+  function animar(){
+    const h=altura();
+    let rama, texto, clase;
+    if(errorSecuencia!=="0"){ rama='r0'; clase='mal';
+      texto='Despegue fallido: tu secuencia de despegue era incorrecta ('+errorSecuencia+'). El cohete explotó en la plataforma. Corrige el Nivel 1 y vuelve a intentarlo.'; }
+    else if(h>=113000 && h<141750){ rama='r1'; clase='ok';
+      texto='¡Despegue exitoso! Felicidades, cadete: tu tripulación se dirige a Marte. Altura alcanzada: '+Math.round(h).toLocaleString('es-MX')+' m.'; }
+    else if(h>=141750){ rama='r2'; clase='mal';
+      texto='Despegue fallido: tu aceleración fue demasiado alta y el cohete se salió de control ('+Math.round(h).toLocaleString('es-MX')+' m). Baja la aceleración o el tiempo.'; }
+    else { rama='r3'; clase='mal';
+      texto='Despegue fallido: tu aceleración fue demasiado pequeña y el cohete se quedó sin fuerza ('+Math.round(h).toLocaleString('es-MX')+' m). Sube la aceleración o el tiempo.'; }
+
+    const t0=performance.now(), DUR=3400;
+    const subida = rama==='r1' ? 300 : rama==='r2' ? 320 : rama==='r3' ? 110 : 0;
+    (function frame(t){
+      const k=Math.min((t-t0)/DUR,1);
+      let y, fuego=true, explosion=false;
+      if(rama==='r0'){ explosion = k>0.25; y=0; fuego=!explosion; }
+      else if(rama==='r1'){ y=subida*k; }
+      else { const kk=k<0.55? k/0.55 : 1-(k-0.55)/0.45; y=subida*Math.max(kk,0); fuego=k<0.55; }
+      dibujar(y, fuego, explosion, true);
+      if(k<1) requestAnimationFrame(frame);
+      else {
+        document.getElementById(rama).classList.add('rama');
+        msg.className='mensaje '+clase; msg.textContent=texto;
+        msg.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    })(t0);
+  }
+};
+</script>
+</body>
+</html>
